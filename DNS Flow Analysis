@@ -1,0 +1,101 @@
+🌐 DNS - The Internet's Phonebook
+
+# What is DNS?
+Definition: The "phone book" of the internet
+Function: Converts human-friendly names (like google.com) to IP addresses (like 142.250.190.78)
+Importance: Without DNS, you'd have to memorize IP addresses for every website
+
+
+# How DNS Works in My Capture
+The Players:
+1. Client = My PC (IP: 192.168.40.X) - Asks the questions
+2. DNS Server = My Router (IP: 192.168.40.1) - Provides the answers
+
+
+# Getting Started with Wireshark
+
+1. Start Capture:Double-click on "Wi-Fi" in the Wireshark interface
+OR click the blue shark fin icon (🦈) labeled "Start Capturing Packets"
+
+2. DNS Filter:
+Type dns in the filter bar and press Enter
+Click on any DNS packet
+Look at the bottom panel to see:
+
+3. What to Observe in DNS Packets
+
+Questions to Answer in Your Capture:
+1. What website names does your computer ask about? (e.g., google.com, microsoft.com)
+2. Do you see any "Answers" that show IP addresses?
+
+
+📊 The Three Panels of Wireshark
+Your Wireshark window is divided into three sections:
+
+Panel	What It Shows
+Top (Packet List)	A list of all packets with Time, Source, Destination, Protocol, Info
+Middle (Packet Details)	The structured breakdown of the selected packet
+Bottom (Packet Bytes)	The raw data - the actual 1s and 0s in hexadecimal
+
+### Understanding the Packet Bytes Pane -a Bottom where the data is just 1s and 0s
+
+Column	What It Shows
+a. 0000, 0010, 0020	The offset (position in the data stream)
+b. 00 79 ad c7 40	The actual data in hexadecimal
+c. The dots and text	The ASCII text version - what humans can read
+
+#What each part means:
+a. Left column (0000, 0010, etc.) = The offset (position in the data)
+b. Middle columns (00 00 00 ...) = The actual data in hexadecimal
+c. Right column (dots and letters) = The ASCII text representation
+
+# Why the Packet Bytes Pane is Useful
+- Deep troubleshooting: When something breaks, you can examine raw data to find the exact problem
+- Security analysis: Spot malicious data hidden in packets
+- Protocol understanding: See exactly what's being sent, byte by byte
+- Forensics: Prove what data was actually transmitted
+
+
+
+
+🔄 DNS Flow Analysis
+The DNS Resolution Process (Example from My Capture)
+Step 1: Client Questions
+Packet #6058: 192.168.40.X → 192.168.40.1
+
+Question: "What is the HTTPS record for pcdn.brave.com?"
+Type: DNS Query (Standard query)
+Packet #6059: 192.168.40.X → 192.168.40.1 (0.00015 seconds later!)
+
+Question: "What is the A record (IP address) for pcdn.brave.com?"
+Type: DNS Query (Standard query)
+
+Step 2: Server Answers
+Packet #6060: 192.168.40.1 → 192.168.40.X
+Answer: "pcdn.brave.com is actually a CNAME alias for: [long-cloudflare-name].pacloudflare.com"
+Type: DNS Response
+
+Packet #6061: 192.168.40.1 → 192.168.40.X
+Answer: "Here is the HTTPS service info for that Cloudflare domain"
+Type: DNS Response
+
+
+### Understanding Wireshark Arrows
+a. Right arrow (→) = Request/question from your PC
+b. Left arrow (←) = Response/answer from the server
+
+
+### Key Learning: CNAME Records
+CNAME = "Canonical Name" = an ALIAS
+What happened: My PC asked for pcdn.brave.com, but the DNS server said:
+"Actually, that's just an alias. The REAL name is this long Cloudflare name. Go ask that one for the IP."
+Why this matters: This is common when websites use CDNs (Content Delivery Networks) like Cloudflare to speed up content delivery.
+
+
+# Packet-by-Packet Breakdown
+Packet	Time	Source → Destination	What's happening
+#6058	48.494380600	Client → Router	Question 1: "What's the HTTPS record for pcdn.brave.com?"
+#6059	48.494531000	Client → Router	Question 2: "What's the A record for pcdn.brave.com?"
+#6060	48.526682800	Router → Client	Answer: "CNAME alias for Cloudflare domain"
+#6061	48.526689100	Router → Client	Answer: "HTTPS record for Cloudflare domain"
+Note: The two questions were sent just 0.00015 seconds apart!
