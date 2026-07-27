@@ -25,7 +25,3 @@ A comprehensive self-study project documenting my hands-on exploration of networ
 | **Error Detection** | Expert Info analysis, retransmissions, D-SACK, connection resets |
 | **TCP Streams** | Complete conversation reconstruction, debugging techniques |
 | **Wireshark Proficiency** | Display filters, Follow TCP Stream, Expert Information, Packet Bytes pane |
-
----
-
-## 📂 Repository Contents
