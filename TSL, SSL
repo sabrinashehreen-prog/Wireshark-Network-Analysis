@@ -1,0 +1,84 @@
+What is TLS/SSL?
+TLS (Transport Layer Security) = The encryption that protects my data!
+
+Think of it like this:
+HTTP = Sending a postcard (anyone can read it!)
+HTTPS/TLS = Sending a locked safe (only the recipient has the key!)
+
+Observe the Handshake: Look for these packets (in order):
+
+Packet	Direction	Info	What's Happening
+#1	My PC → Server	Client Hello	"I want to connect securely."
+#2	Server → My PC	Server Hello	"OK, let's use these settings."
+#3	Server → My PC	Certificate	"Here's my ID card."
+#4	Server → My PC	Server Key Exchange	"Here's the math."
+#5	My PC → Server	Client Key Exchange	"Here's my math."
+#6	My PC → Server	Change Cipher Spec	"Now it's encrypted!"
+#7	Server → My PC	Change Cipher Spec	"Agreed! Encrypted now!"
+#8	My PC → Server	Encrypted Alert	"Hello from the other side!"
+
+TLS/SSL - KEY POINTS:
+┌──────────────────────────────────────────────────────────────┐
+│ 1. TLS encrypts ALL data after the handshake.              │
+│ 2. Handshake = Agree on encryption, verify identity.       │
+│ 3. Certificate = Digital ID card (proves who the server is).│
+│ 4. Visible in Wireshark:                                   │
+│    - IP addresses, ports, SNI, TLS version.                │
+│ 5. Hidden from Wireshark:                                  │
+│    - Actual data, passwords, webpages.                     │
+│ 6. TLS 1.3 is faster and more secure than TLS 1.2.        │
+│ 7. HTTPS = HTTP inside TLS (encrypted!)                    │
+│                                                             │
+│ FILTERS TO KNOW:                                           │
+│   tls            - All TLS traffic                         │
+│   tls.handshake  - Handshake packets                       │
+│   tls.record.content_type == 23   - Application data       │
+└──────────────────────────────────────────────────────────────┘
+
+
+What I CAN See in TLS:
+✅ Visible Information:
+
+1. Source IP and Destination IP (who's talking).
+2. Port number (443 for HTTPS).
+3. Server Name Indication (SNI) - the domain name (e.g., example.com).
+4. TLS version (TLS 1.2, TLS 1.3).
+5. Cipher suites (encryption methods offered).
+6. Certificate details (who issued it, expiry date).
+
+
+❌ Hidden Information (Encrypted!):
+
+1. The actual data (webpages, passwords, credit cards).
+2. HTTP headers (User-Agent, Accept-Language, cookies).
+3. URL path (what page I'm on).
+4. Query parameters (?q=search+term).
+5. Response content (HTML, JSON, images).
+
+
+Cipher Suite Breakdown:
+TLS = Protocol.
+ECDHE = Key exchange method (how they agree on encryption key).
+ECDSA = Authentication method (proving identity).
+AES_128_GCM = Encryption method (how data is scrambled).
+SHA256 = Integrity check (ensuring data wasn't tampered).
+
+What to Look For in My TLS Capture:
+In the Client Hello:
+Cipher Suites offered (click to expand):
+How many does my browser support?
+Is TLS 1.3 offered?
+
+Extensions:
+server_name = The website I'm visiting.
+supported_versions = TLS 1.3/1.2 support.
+key_share = For TLS 1.3 key exchange.
+
+In the Server Hello:
+Cipher Suite chosen – Which one did the server pick?
+Compression Method – Usually "null" (no compression).
+
+In the Certificate:
+Subject – Who is this certificate for?
+Issuer – Who verified this certificate?
+Validity – Is it still valid?
