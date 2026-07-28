@@ -1,0 +1,77 @@
+How to Find Errors in Wireshark:
+
+Method 1: Expert Info (The EASY way!)
+Bottom-left corner of Wireshark.
+Click on the "Expert Information" icon (the little circle with an exclamation mark).
+OR go to: Analyze → Expert Information.
+I'll see a window with color-coded categories:
+
+
+🟩 Notes (Green)    = Normal, informational
+🟨 Warnings (Yellow)= Something to check
+🟥 Errors (Red)     = PROBLEMS!
+WARNINGS (Yellow) - Things to Pay Attention To:
+
+1️⃣ DNS Issues (Warning Level)
+DNS response retransmission  | Protocol: DNS  | Count: 1
+DNS query retransmission     | Protocol: DNS  | Count: 2
+DNS query retransmission     | Protocol: mDNS | Count: 4
+DNS response retransmission  | Protocol: mDNS | Count: 7
+DNS response missing         | Protocol: mDNS | Count: 14
+
+What this means:
+My PC asked for DNS lookups, but had to ask again (retransmissions).
+14 mDNS responses were missing (mDNS = Multicast DNS, used for local device discovery).
+This suggests network congestion or WiFi issues.
+What to check: My WiFi signal, network congestion, or router performance.
+
+2️⃣ TCP Sequence Issues (Warning Level)
+
+Out-of-order segment         | Count: 6
+Previous segment(s) not captured | Count: 24
+Connection reset (RST)       | Count: 76  ← ALARMING!
+D-SACK Sequence              | Count: 211 ← BIG PROBLEM!
+What these mean:
+
+Warning	What It Means	Severity
+Connection reset (RST)	Connections being abruptly closed	⚠️ HIGH
+D-SACK Sequence	Duplicate Selective ACK - packets arriving out of order	⚠️ HIGH
+Out-of-order	Packets not arriving in correct sequence	⚠️ MEDIUM
+Previous segment not captured	Packet loss or capture start	ℹ️ LOW
+76 RST packets = 76 connections were forcefully terminated.
+
+211 D-SACK = Significant packet reordering.
+
+3️⃣ TLS/QUIC Issues
+Ignored Unknown Record        | Protocol: TLS | Count: 2
+Failed to decrypt handshake   | Protocol: QUIC | Count: 607
+QUIC = A newer protocol (faster than TCP).
+
+607 decryption failures = QUIC traffic is encrypted; Wireshark can't read it.
+🟩 NOTES (Green) - Interesting Observations:
+Keep-Alive Traffic
+
+TCP keep-alive segment   | Count: 209
+ACK to TCP keep-alive    | Count: 202
+Connection closing       | Count: 241 + 250
+What this means: My PC is actively maintaining connections, keeping them alive, and 
+properly closing them. This is NORMAL behavior.
+
+Retransmissions
+This frame is a (suspected) retransmission | Count: 25
+25 retransmissions = Some packet loss, but not catastrophic.
+
+Packet Length Exceeds MSS
+This packet's length exceeds MSS | Count: 411
+MSS = Maximum Segment Size.
+What this means: My network card is using TSO (TCP Segmentation Offload) – 
+the OS sends large packets and the network card splits them. This is NORMAL.
+
+💬 CHAT (Blue) - Normal Operations:
+
+Connection establish request (SYN)      | Count: 260
+Connection establish acknowledge (SYN+ACK) | Count: 260
+Connection finish (FIN)                 | Count: 491
+What this means: My PC established 260 TCP connections and closed 491 connections.
+
+Interesting: More FINs than SYNs means I closed connections that were already established (normal for web browsing).
