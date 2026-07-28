@@ -1,0 +1,85 @@
+TCP STREAMS
+
+Without TCP Stream: I hear ONE SENTENCE at a time.
+With TCP Stream: I hear the ENTIRE CONVERSATION from start to finish!
+
+In Wireshark:
+A TCP Stream = ALL packets between a client and server for ONE connection.
+Combines requests AND responses into one complete conversation.
+Shows me the actual data being transferred (HTML, JSON, images, etc.).
+
+Key Points:
+TCP Stream = Complete conversation between client/server.
+Red text = Data from client (my PC) → Server (requests).
+Blue text = Data from server → My PC (responses).
+Use for: Debugging, forensics, understanding protocols.
+Shortcut: Ctrl+Alt+Shift+T (after selecting a packet).
+Save as: Export the conversation to a file.
+Shows: Headers, content, errors, everything!
+PRO TIP: Save HTML responses and open in my browser – I'll see the actual webpage!
+
+
+How to Use TCP Streams in Wireshark: Step-by-Step:
+Capture some HTTP traffic.
+Open Wireshark (no filter needed, or use http).
+Go to http://neverssl.com in my browser.
+Find an HTTP packet:
+Filter: http or look for a packet with "GET" in the Info column.
+Click on ANY HTTP packet (request or response).
+Follow the TCP Stream: Right-click on the packet → Follow → TCP Stream.
+OR use shortcut: Ctrl + Alt + Shift + T.
+
+A new window opens showing the ENTIRE conversation!
+TCP STREAMS – WHAT I SAW:
+RED = Client request (GET /time/1/current...).
+BLUE = Server response (HTTP/1.1 200 OK).
+Headers tell the story:
+Host: Which server.
+User-Agent: Which browser.
+Accept-Encoding: Compression negotiation.
+Content-Type: JSON data.
+
+The remote server returned GZIPPED data (not readable in ASCII).
+200 OK = Success! Everything worked!
+PRO TIP: Not all HTTP traffic is webpages – APIs, time sync, and tracking use HTTP too!
+
+What's happening here:
+GET = My browser is REQUESTING data.
+/time/1/current = The remote server's current time API endpoint.
+cup2key=... = Security/tracking key (for API authentication).
+HTTP/1.1 = Using HTTP version 1.1 protocol.
+
+📋 Request Headers (What my PC told the server):
+
+Header	Value	What It Means
+Host	clients2.example.com	Which server to talk to.
+User-Agent	Chrome/150.0.0.0	Using Chrome browser on my OS.
+Cache-Control	no-cache	"Don't use cached version, get fresh data!"
+Accept-Encoding	gzip, deflate	"Compress the data please" (to save bandwidth).
+Response Headers (What the server told my PC):
+
+Header	Value	What It Means
+Content-Type	application/json	"I'm sending JSON data."
+Content-Encoding	gzip	"Here's my compressed data."
+Date	Sun, 26 Jul 2026 21:17:46 GMT	The server's current time (this is what I asked for!).
+Server	ServerType	The server's type (anonymized).
+Cache-Control	no-cache, no-store, max-age=0	"Don't cache this, it's dynamic data!"
+📦 Part 3: The Actual Data (Compressed)
+
+
+5e
+......U..VJ.-*J.+./..M......V.24.0540033366.Q*N-*K-....KN.J......Y......X......
+a
+....j(0...
+This is GZIPPED JSON data!
+
+What's happening:
+The server sent compressed (gzip) data.
+My browser decompresses it automatically.
+That's why it looks like gibberish in Wireshark.
+
+The numbers:
+5e and a = Chunk sizes (hexadecimal).
+5e = 94 bytes in this chunk.
+a = 10 bytes in this chunk.
+Chunked encoding = Data sent in pieces.
