@@ -1,0 +1,68 @@
+ICMP KEY TAKEAWAYS:
+	ICMP doesn't happen automatically - you must trigger it 
+	Ping uses Echo Request (Type 8) and Echo Reply (Type 0) 
+	TTL shows how many hops between you and the target      
+	Sequence numbers help identify lost packets             
+	RTT (round trip time) shows network latency            
+	Your PC ALWAYS talks to your router FIRST (MAC address)
+
+How to Test ICMP Right Now:
+	Step 1: Open Command Prompt
+•	Press Windows Key + R
+•	Type cmd and press Enter
+	Step 2: Start Wireshark Capture
+•	Click the blue shark fin to start capturing
+•	Filter: icmp (just type it and press Enter)
+
+	Step 3: Run Ping Commands
+•	In the Command Prompt, type:
+o	ping google.com
+o	ping 8.8.8.8
+o	ping 333.333.33.3 (your router)
+Step 4: Look in Wireshark
+•	You should see:
+o	Echo (ping) request → Your PC asking "Are you there?"
+o	Echo (ping) reply → The target answering "Yes, I'm here!"
+
+ 
+TEST 1: Ping to Google (142.250.188.46)
+Packet	Direction	What Happened
+2683	Your PC → Google	Echo Request (asking "are you there?")
+2684	Google → Your PC	Echo Reply (saying "yes, I'm here!")
+2687	Your PC → Google	Echo Request
+2688	Google → Your PC	Echo Reply
+Time difference: ~20ms response time (33.619 → 33.639 = 0.020 seconds)
+________________________________________
+TEST 2: Ping to Google DNS (8.8.8.8)
+Packet	Direction	What Happened
+3248	Your PC → 8.8.8.8	Echo Request
+3249	8.8.8.8 → Your PC	Echo Reply
+3250	Your PC → 8.8.8.8	Echo Request
+3251	8.8.8.8 → Your PC	Echo Reply
+Notice: Response time ~18ms (faster than the first Google IP!)
+________________________________________
+TEST 3: Ping to YOURSELF (127.0.0.1 / localhost)
+Packet	What Happened
+3824	Destination: 333.333.33.33 (my own IP!)
+This is a loopback ping - the packet goes out and comes right back!
+
+Key Observations You Should Notice:
+1.	TTL (Time To Live) Values
+	Your PC → Google:    TTL = 128 (starting value)
+	Google → Your PC:    TTL = 111 (decreased by 17 hops!)
+Why? Each router the packet passes through subtracts 1 from TTL.
+•	Google's reply started with TTL ~128
+•	It went through 17 routers to reach you (128 - 111 = 17)
+2.	Sequence Numbers: seq=17/4352, seq=18/4608, seq=19/4864
+What this means:
+•	First number (17, 18, 19) = packet sequence (ping count)
+•	Second number (4352, 4608, 4864) = data payload size (growing!)
+3.	Response Times (RTT - Round Trip Time)
+	33.619 → 33.639 = 20ms   (Google IP)
+	39.524 → 39.540 = 16ms   (8.8.8.8)
+8.8.8.8 is faster - it's Google's public DNS, likely closer to you!
+
+4. MAC Addresses (From Frame Details)
+•	Source MAC: Intel_xx:xx:xx (xx:xx:xx:xx:xx) ← my PC's network card
+•	Destination MAC: Calix_xx:xx:xx (xx:xx:xx:xx:xx:xx) ← my Router
+Why? Your PC sends the packet to your router first (MAC address), then the router forwards it to Google.
