@@ -1,0 +1,39 @@
+ARP (Address Resolution Protocol)
+PURPOSE: Maps IP addresses → MAC addresses
+
+Your PC wants to send a packet to a remote server (e.g., 203.0.113.1):
+
+Step 1: "I know the destination IP."
+Step 2: "But I need the MAC address to send it."
+Step 3: "Let me ask: Who has 203.0.113.1? Tell me your MAC!" ← THIS IS ARP!
+Step 4: The router replies: "I know how to get there! My MAC is aa:bb:cc:11:22:33."
+Step 5: Packet goes to the router, and the router forwards it.
+
+WHY IT MATTERS:
+Without ARP, your PC can't send ANY packets.
+All traffic goes through your local router first.
+ARP cache speeds up communication by storing previous lookups.
+Packet Example – The Most Important One
+
+Packet A (Request):
+Sender MAC (Vendor_A) → Destination MAC (Vendor_B)
+ARP Request: "Who has IP 192.168.1.100? Tell 192.168.1.1."
+
+What's happening: The router is asking, "Who has IP 192.168.1.100?" (that’s your device).
+
+Packet B (Reply):
+Sender MAC (Vendor_B) → Destination MAC (Vendor_A)
+ARP Reply: "192.168.1.100 is at aa:bb:cc:dd:ee:ff."
+What's happening: Your device responds, "That's me! Here's my MAC address."
+
+ARP in Real Networks
+ARP Announcements (Gratuitous ARP)
+Device: "I'm using this IP!"
+Sender IP = Target IP (same address).
+Used for IP conflict detection (checks if another device is using the same IP).
+ARP Requests ("Who has?")
+Router/device: "Who has IP X? Tell me!"
+Sent to broadcast MAC (ff:ff:ff:ff:ff:ff) so all devices on the local network hear it.
+ARP Replies ("It's me!")
+Device: "That's me! Here's my MAC."
+Sent directly to the asking device (unicast).
