@@ -1,0 +1,136 @@
+HTTP filter 
+(NeverSSL deliberately avoids encryption and security policies like HSTS,
+NeverSSL.com is designed to trigger public Wi-Fi login screens (captive portals) at hotels, airports,
+and coffee shops. Because modern browsers and websites prioritize secure HTTPS connections, 
+networks cannot intercept them to show a login page. 
+By using an unsecured HTTP link, NeverSSL forces the network to redirect you.)
+
+1.	If you see no packets, open your browser and go to http://neverssl.com (a site that uses HTTP, not HTTPS)
+2.	Open Wireshark and make it run in the background
+3.	Open browser, and search Neverssl there.
+4.	Go to Wireshark, Type http in the filter bar
+5.	Press Enter, and that’s how to capture again with HTTP filter
+
+
+ 
+HTTP STATUS CODES - YOUR QUICK REFERENCE
+Code	Category	Meaning	Did You See This?
+1xx	Informational	"Processing..."	Not yet
+2xx	Success	"Everything worked!"	✅ 200 OK
+3xx	Redirect	"Go somewhere else"	✅ 301 Moved Permanently
+4xx	Client Error	"You messed up"	Not yet (404, 403, etc.)
+5xx	Server Error	"Server messed up"	Not yet (500, 502, etc.)
+
+Request Methods
+Method	What It Does	Did You See This?
+GET	Get data from server	✅ Yes!
+POST	Send data to server (forms, uploads)	Not yet
+PUT	Upload/update a file	Not yet
+DELETE	Delete something	Not yet
+HEAD	Get just the headers (no body)	Not yet
+
+1.	From my image line-observation is:
+a.	Packet 1035, 192.168.XX.XX (my pc) is asking for a webpage from 34.223.124.45 (web server)
+b.	Packet 1037, Web server responses my pc that 301 = this page has moved permanently
+i.	The server id telling my browser: “Go to the new location instead.”
+c.	Packet 1040, my browser tried again maybe it didn’t follow the redirect properly or the page was reloaded
+d.	Packet 1048, 200 Ok = Success, the server responded that it was able to find the page
+e.	Packet 1089, after loading the webpage, the browser automatically asks for the “favicon.io”, here favicon is the small icon that appears in browser
+f.	Packet 1093, 200 OK  response means browser found the icon and sending the actual PNG icon data.
+
+2.	In the Request Headers (by clicking 1035, in the Hyper Text Transfer Protocol Section):
+a.	Host: - Which website (e.g., example.com) = neverssl.com
+b.	User-Agent: - Which browser/OS (e.g., Chrome, Firefox, Windows)
+c.	Accept: - What file types my browser wants
+d.	Accept-Language: - Your language preference
+e.	Connection: - Keep-alive or close
+f.	Referer: - Where I came from
+
+3.	In the Response Headers (Click 1048 to see in the Hyper Text Transfer Protocol Section):
+a.	Content-Type: - What type of file (HTML, JSON, PNG, etc.)
+b.	Content-Length: - Size of the response in bytes
+c.	Server: - What web server is running (Apache, nginx, etc.)
+d.	Location: - Where to redirect (for 301/302 responses)
+e.	Set-Cookie: - Cookie being set
+f.	Cache-Control: - How to cache this page
+
+4.	The Actual Content (The Body):
+5.	After the headers, there's the actual data
+a.	Find the Location header:
+b.	Click packet #1037
+c.	Expand the HTTP section
+d.	Find Location: [URL] - Where were you redirected to?
+
+6.	For HTML pages: The actual webpage code
+a.	Look at the actual HTML:
+b.	Click packet #1048
+c.	Right-click → Follow → TCP Stream
+d.	See the actual HTML code that was returned
+
+7.	For images: The image data (bytes)
+8.	For JSON: The data in JSON format
+
+9.	Find the User-Agent:
+a.	Click packet #1035
+b.	Expand HTTP → Look for User-Agent:
+c.	What browser/OS does it show?
+
+10.	Check Content-Type:
+a.	Click packet #1093
+b.	Look for Content-Type: image/png
+c.	The server correctly identified the favicon as a PNG
+
+
+HTTP vs HTTPS - Quick Comparison
+Feature	HTTP	HTTPS
+Security	❌ Unencrypted	✅ Encrypted
+Port	80	443
+Can you see content?	✅ Yes, in plain text	❌ No, it's encrypted
+Can you see headers?	✅ Yes	❌ No
+What Wireshark shows	Full request/response	Only IPs and ports
+
+HTTPS filter: 
+1.	Filter: tls or ssl
+2.	You'll see encrypted traffic
+3.	You CAN'T see the actual content (because of encryption!)
+4.	You CAN see the handshake (certificate exchange)
+Note: This is the MOST useful Wireshark feature for HTTP:
+1.	Right-click any HTTP packet
+2.	Select Follow → TCP Stream
+3.	You'll see the ENTIRE conversation:
+o	All the requests your PC made
+o	All the responses from the server
+o	The actual HTML/JSON/Image data
+4.	Use the dropdown to view in:
+o	ASCII (readable text)
+o	Hex Dump (for images/binary)
+o	C Arrays (for developers)
+ 
+TCP/the Three-way Handshake Filter
+What is TCP?
+•	Transmission Control Protocol
+•	Reliable, connection-oriented protocol
+•	Used by HTTP, HTTPS, DNS, email, etc.
+•	Guarantees data arrives correctly
+
+Sequence Number (SEQ):
+•	A number that labels each byte of data
+•	Starts with a random number (the ISN - Initial Sequence Number)
+•	Increases by the amount of data sent
+•	Used to reassemble data in correct order
+Acknowledgment Number (ACK):
+•	"I have received up to this sequence number"
+•	Next expected byte from the other side
+•	Confirms receipt of data
+ 
+TCP Error Detection - Retransmissions:
+•	If a packet is lost, the sender will resend it
+•	Wireshark will show "TCP Retransmission" in Info column
+•	This is a sign of network problems (packet loss, congestion, etc.)
+
+The TCP 3-Way Handshake (Connection Setup):
+Every TCP connection starts with this exact sequence:
+Step	Packet	Direction	What It Means
+1	[SYN]	Client → Server	"Hello, I want to connect. Here's my initial sequence number."
+2	[SYN, ACK]	Server → Client	"Hello back! I agree to connect. Here's MY initial sequence number AND I'm acknowledging yours."
+3	[ACK]	Client → Server	"Great! I acknowledge YOUR sequence number. Connection is now established."
